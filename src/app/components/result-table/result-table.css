@@ -1,0 +1,69 @@
+:host {
+  --tone: var(--accent);
+  --tone-soft: var(--surface);
+  display: block;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+:host(.external) {
+  --tone: var(--external);
+  --tone-soft: var(--external-soft);
+}
+:host(.internal) {
+  --tone: var(--internal);
+  --tone-soft: var(--internal-soft);
+}
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--tone-soft);
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--tone);
+}
+
+.table-wrap {
+  max-height: 520px;
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+th,
+td {
+  padding: 8px 10px;
+  text-align: right;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+}
+
+tbody tr:nth-child(even) {
+  background: var(--row-alt);
+}
+
+.empty,
+.more {
+  margin: 0;
+  padding: 16px;
+  color: var(--muted);
+}

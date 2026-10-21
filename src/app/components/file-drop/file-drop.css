@@ -1,0 +1,46 @@
+:host {
+  --tone: var(--accent);
+  display: block;
+}
+:host(.external) {
+  --tone: var(--external);
+}
+:host(.internal) {
+  --tone: var(--internal);
+}
+
+.drop {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+  padding: 20px;
+  background: var(--surface);
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.drop:hover,
+:host(.over) .drop {
+  border-color: var(--tone);
+}
+:host(.loaded) .drop {
+  border-style: solid;
+  border-color: var(--tone);
+}
+
+input {
+  display: none;
+}
+
+.label {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--tone);
+}
+
+.status {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}

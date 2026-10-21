@@ -1,0 +1,10 @@
+<label
+  class="drop"
+  (dragover)="onDragOver($event)"
+  (dragleave)="dragOver.set(false)"
+  (drop)="onDrop($event)"
+>
+  <input type="file" accept=".xlsx,.xlsm" (change)="onInputChange($event)" />
+  <span class="label">{{ label() }}</span>
+  <span class="status">{{ status() }}</span>
+</label>

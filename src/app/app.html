@@ -1,0 +1,77 @@
+<main>
+  <h1>השוואת קבצי אקסל לפי מספר פריט</h1>
+  <p class="sub">
+    מעלים קובץ חיצוני וקובץ פנימי, ומקבלים את השורות שקיימות רק באחד מהם. הקבצים נשארים במחשב שלך
+    ולא נשלחים לשום מקום.
+  </p>
+
+  <div class="uploads">
+    <app-file-drop
+      label="קובץ חיצוני"
+      variant="external"
+      [status]="status('external')"
+      [loaded]="!!sheets().external"
+      (fileSelected)="onFile('external', $event)"
+    />
+    <app-file-drop
+      label="קובץ פנימי"
+      variant="internal"
+      [status]="status('internal')"
+      [loaded]="!!sheets().internal"
+      (fileSelected)="onFile('internal', $event)"
+    />
+  </div>
+
+  <div class="actions">
+    <button type="button" class="primary" [disabled]="!canCompare()" (click)="compare()">
+      השוואה
+    </button>
+    @if (result()) {
+      <button type="button" (click)="downloadAll()">הורדת קובץ אחד עם שני הגיליונות</button>
+    }
+  </div>
+
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+
+  @if (result(); as result) {
+    <div class="summary">
+      <div class="stat">
+        <strong>{{ sheets().external?.rows?.length }}</strong>
+        <span>שורות בקובץ החיצוני</span>
+      </div>
+      <div class="stat">
+        <strong>{{ sheets().internal?.rows?.length }}</strong>
+        <span>שורות בקובץ הפנימי</span>
+      </div>
+      <div class="stat external">
+        <strong>{{ result.onlyInExternal.length }}</strong>
+        <span>רק בחיצוני</span>
+      </div>
+      <div class="stat internal">
+        <strong>{{ result.onlyInInternal.length }}</strong>
+        <span>רק בפנימי</span>
+      </div>
+    </div>
+
+    @if (skippedNote()) {
+      <p class="note">{{ skippedNote() }}</p>
+    }
+
+    <app-result-table
+      title="קיים בחיצוני ולא קיים בפנימי"
+      variant="external"
+      [headers]="sheets().external!.headers"
+      [rows]="result.onlyInExternal"
+      (download)="download('external')"
+    />
+    <app-result-table
+      title="קיים בפנימי ולא קיים בחיצוני"
+      variant="internal"
+      [headers]="sheets().internal!.headers"
+      [rows]="result.onlyInInternal"
+      (download)="download('internal')"
+    />
+  }
+</main>

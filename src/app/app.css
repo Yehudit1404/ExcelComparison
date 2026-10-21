@@ -1,0 +1,81 @@
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+h1 {
+  margin: 0 0 4px;
+  font-size: 1.6rem;
+}
+
+.sub {
+  margin: 0 0 24px;
+  color: var(--muted);
+}
+
+.uploads {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 640px) {
+  .uploads {
+    grid-template-columns: 1fr;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.error {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  white-space: pre-line;
+  color: var(--error);
+  background: var(--error-soft);
+  border-radius: 8px;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.stat strong {
+  font-size: 1.6rem;
+}
+.stat span {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.stat.external strong {
+  color: var(--external);
+}
+.stat.internal strong {
+  color: var(--internal);
+}
+
+.note {
+  margin: -12px 0 20px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+app-result-table {
+  margin-bottom: 24px;
+}

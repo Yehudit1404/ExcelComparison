@@ -1,0 +1,35 @@
+<header>
+  <h2>{{ title() }} ({{ rows().length }})</h2>
+  <button type="button" (click)="download.emit()">הורדה לאקסל</button>
+</header>
+
+@if (rows().length) {
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          @for (header of headers(); track $index) {
+            <th>{{ header }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of visibleRows(); track $index) {
+          <tr>
+            @for (cell of row.cells; track $index) {
+              <td>{{ cell.text }}</td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (hiddenCount()) {
+    <p class="more">
+      מוצגות {{ visibleRows().length }} שורות ראשונות. עוד {{ hiddenCount() }} שורות נמצאות בקובץ
+      להורדה.
+    </p>
+  }
+} @else {
+  <p class="empty">אין שורות - כל הפריטים קיימים בשני הקבצים.</p>
+}
