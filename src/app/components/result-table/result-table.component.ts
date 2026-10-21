@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Output,
+  computed,
+  input,
+  signal,
+} from '@angular/core';
 import { SheetRow } from '../../core/sheet.model';
 
 /** Large results are only partly drawn on screen; the download always has every row. */
@@ -18,7 +26,7 @@ export class ResultTableComponent {
   readonly headers = input.required<string[]>();
   readonly rows = input.required<SheetRow[]>();
 
-  readonly download = output<void>();
+  @Output() readonly download = new EventEmitter<void>();
 
   /** The table starts closed and opens when the title is clicked. */
   protected readonly expanded = signal(false);

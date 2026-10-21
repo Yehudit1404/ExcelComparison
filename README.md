@@ -17,11 +17,11 @@
 
 ## טכנולוגיות
 
-- **Angular 18** עם אותן חבילות בדיוק של פרויקט Angular 18 חדש (`ng new`), בלי שום ספרייה נוספת.
+- **Angular 17** (17.2 ומעלה), עם אותן גרסאות חבילות כמו בפרויקטי Angular 17 בארגון, בלי שום ספרייה נוספת.
 - קריאה וכתיבה של קבצי אקסל נעשות בקוד של הפרויקט (`src/app/core/xlsx`),
   בעזרת יכולות מובנות של הדפדפן (`DecompressionStream`, `CompressionStream`, `DOMParser`).
   נדרש דפדפן Chrome או Edge בגרסה 80 ומעלה, או Firefox בגרסה 113 ומעלה.
-- בדיקות: Karma + Jasmine.
+- בדיקות: Karma + Jasmine (קבצי `*.spec.ts`). חבילות הבדיקה לא מותקנות כברירת מחדל, ראו בהמשך.
 
 ## מבנה הפרויקט
 
@@ -48,9 +48,20 @@ scripts/build-offline.mjs            יוצר קובץ HTML אחד שנפתח ב
 ```bash
 npm install
 npm start               # פיתוח: האתר עולה בכתובת http://localhost:4200
-npm test                # הרצת הבדיקות
 npm run build           # בנייה רגילה לשרת, התוצאה בתיקייה dist/excel-comparison/browser
 npm run build:offline   # קובץ אחד: dist/offline/excel-comparison.html
+```
+
+נדרש Node.js בגרסה 18.13 ומעלה, או 20.
+
+אם `npm install` נחסם במאגר החבילות של הארגון, אפשר להעתיק לכאן את `package-lock.json`
+מפרויקט Angular 17 אחר שעובד, ולהריץ שוב `npm install`.
+
+### הרצת הבדיקות (לא חובה)
+
+```bash
+npm install --no-save @types/jasmine@~5.1.0 jasmine-core@~5.1.0 karma@~6.4.0 karma-chrome-launcher@~3.2.0 karma-coverage@~2.2.0 karma-jasmine@~5.1.0 karma-jasmine-html-reporter@~2.1.0
+npx ng test
 ```
 
 ### שימוש במחשב בלי אינטרנט

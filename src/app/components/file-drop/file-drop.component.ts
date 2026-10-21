@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Output,
+  input,
+  signal,
+} from '@angular/core';
 
 /** A box that accepts one Excel file, by click or by drag and drop. */
 @Component({
@@ -20,7 +27,7 @@ export class FileDropComponent {
   readonly status = input.required<string>();
   readonly loaded = input(false);
 
-  readonly fileSelected = output<File>();
+  @Output() readonly fileSelected = new EventEmitter<File>();
 
   protected readonly dragOver = signal(false);
 
