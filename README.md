@@ -64,7 +64,8 @@ npm install --no-save @types/jasmine@~5.1.0 jasmine-core@~5.1.0 karma@~6.4.0 kar
 npx ng test
 ```
 
-### שימוש במחשב בלי אינטרנט
+### קבצים מוכנים בתיקייה הראשית
 
-הדרך הפשוטה: מריצים `npm run build:offline` ומעבירים את הקובץ
-`dist/offline/excel-comparison.html` למחשב. פותחים אותו בלחיצה כפולה, ולא צריך שרת או התקנה.
+- **`excel-comparison.html`** – האתר המוכן כקובץ אחד. פותחים בלחיצה כפולה, בלי התקנה ובלי אינטרנט.
+  אחרי שינוי בקוד מעדכנים אותו: `npm run build:offline` ומעתיקים את `dist/offline/excel-comparison.html` לכאן.
+- **`start.bat`** – לחיצה כפולה מתקינה את החבילות (בפעם הראשונה) ומפעילה את האתר במצב פיתוח.
