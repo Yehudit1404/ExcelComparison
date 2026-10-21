@@ -68,3 +68,10 @@ npx ng test
 
 הדרך הפשוטה: מריצים `npm run build:offline` ומעבירים את הקובץ
 `dist/offline/excel-comparison.html` למחשב. פותחים אותו בלחיצה כפולה, ולא צריך שרת או התקנה.
+
+## חבילה מוכנה ל-Windows (ענף windows-package)
+
+בענף הזה יש את הקובץ `ExcelComparison.zip`: הפרויקט כולו כולל `node_modules` לגרסת Windows (64 ביט),
+`start.bat` להפעלת האתר במצב פיתוח, ו-`excel-comparison.html` המוכן. לא צריך להריץ `npm install`.
+
+הורדה: https://github.com/Yehudit1404/ExcelComparison/raw/windows-package/ExcelComparison.zip
