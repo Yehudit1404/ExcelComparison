@@ -25,6 +25,38 @@ h1 {
   }
 }
 
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.column-picker {
+  --tone: var(--accent);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  background: var(--surface);
+  border: 1px solid var(--tone);
+  border-radius: 10px;
+}
+.column-picker.external {
+  --tone: var(--external);
+}
+.column-picker.internal {
+  --tone: var(--internal);
+}
+.column-picker select {
+  padding: 8px;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;

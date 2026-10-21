@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ITEM_COLUMN, cleanHeader, normalizeItemKey } from './item-key';
+import { ITEM_COLUMN, cleanHeader } from './item-key';
 import { CellValue, SheetCell, SheetData, SheetRow } from './sheet.model';
 import { RawCell, readFirstSheet } from './xlsx/xlsx-reader';
 import { writeWorkbook } from './xlsx/xlsx-writer';
@@ -30,25 +30,12 @@ export class ExcelService {
     const columnCount = raw.reduce((max, row) => Math.max(max, row?.length ?? 0), 0);
     const columns = Array.from({ length: columnCount }, (_, c) => c);
     const headers = columns.map((c) => cleanHeader(toSheetCell(raw[firstRow][c]).text));
-    const keyColumn = headers.indexOf(ITEM_COLUMN);
-    if (keyColumn === -1) {
-      const found = headers.filter(Boolean).join(', ') || '(אין)';
-      throw new Error(
-        `בקובץ "${file.name}" לא נמצאה עמודה בשם "${ITEM_COLUMN}" בשורה הראשונה.\nהעמודות שנמצאו: ${found}`,
-      );
-    }
+    const rows = raw
+      .slice(firstRow + 1)
+      .filter((row): row is (RawCell | undefined)[] => !!row?.some(Boolean))
+      .map((row) => columns.map((c) => toSheetCell(row[c])));
 
-    const rows: SheetRow[] = [];
-    let emptyKeyCount = 0;
-    for (const row of raw.slice(firstRow + 1)) {
-      if (!row?.some(Boolean)) continue;
-      const cells = columns.map((c) => toSheetCell(row[c]));
-      const key = normalizeItemKey(cells[keyColumn].text);
-      if (key) rows.push({ key, cells });
-      else emptyKeyCount++;
-    }
-
-    return { fileName: file.name, headers, rows, emptyKeyCount };
+    return { fileName: file.name, headers, rows, keyColumn: headers.indexOf(ITEM_COLUMN) };
   }
 
   async exportWorkbook(fileName: string, sheets: ExportSheet[]): Promise<void> {

@@ -6,20 +6,34 @@
   </p>
 
   <div class="uploads">
-    <app-file-drop
-      label="קובץ חיצוני"
-      variant="external"
-      [status]="status('external')"
-      [loaded]="!!sheets().external"
-      (fileSelected)="onFile('external', $event)"
-    />
-    <app-file-drop
-      label="קובץ פנימי"
-      variant="internal"
-      [status]="status('internal')"
-      [loaded]="!!sheets().internal"
-      (fileSelected)="onFile('internal', $event)"
-    />
+    @for (item of sides; track item.side) {
+      <div class="side">
+        <app-file-drop
+          [label]="item.label"
+          [variant]="item.side"
+          [status]="status(item.side)"
+          [loaded]="!!sheets()[item.side]"
+          (fileSelected)="onFile(item.side, $event)"
+        />
+        @if (sheets()[item.side]; as sheet) {
+          @if (sheet.keyColumn === -1) {
+            <label class="column-picker" [class]="item.side">
+              <span>לא נמצאה עמודה בשם "{{ itemColumn }}". לפי איזו עמודה להשוות?</span>
+              <select (change)="onKeyColumnChange(item.side, $event)">
+                <option value="-1" [selected]="keyColumns()[item.side] === -1" disabled>
+                  בחרי עמודה
+                </option>
+                @for (header of sheet.headers; track $index) {
+                  <option [value]="$index" [selected]="keyColumns()[item.side] === $index">
+                    {{ columnLabel(header, $index) }}
+                  </option>
+                }
+              </select>
+            </label>
+          }
+        }
+      </div>
+    }
   </div>
 
   <div class="actions">
@@ -38,11 +52,11 @@
   @if (result(); as result) {
     <div class="summary">
       <div class="stat">
-        <strong>{{ sheets().external?.rows?.length }}</strong>
+        <strong>{{ result.external.rows.length }}</strong>
         <span>שורות בקובץ החיצוני</span>
       </div>
       <div class="stat">
-        <strong>{{ sheets().internal?.rows?.length }}</strong>
+        <strong>{{ result.internal.rows.length }}</strong>
         <span>שורות בקובץ הפנימי</span>
       </div>
       <div class="stat external">
@@ -62,14 +76,14 @@
     <app-result-table
       title="קיים בחיצוני ולא קיים בפנימי"
       variant="external"
-      [headers]="sheets().external!.headers"
+      [headers]="result.external.headers"
       [rows]="result.onlyInExternal"
       (download)="download('external')"
     />
     <app-result-table
       title="קיים בפנימי ולא קיים בחיצוני"
       variant="internal"
-      [headers]="sheets().internal!.headers"
+      [headers]="result.internal.headers"
       [rows]="result.onlyInInternal"
       (download)="download('internal')"
     />

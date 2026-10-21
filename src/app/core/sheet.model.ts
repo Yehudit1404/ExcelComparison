@@ -10,21 +10,33 @@ export interface SheetCell {
   numFmt?: string;
 }
 
+/** An uploaded sheet, before a column is chosen for matching. */
+export interface SheetData {
+  fileName: string;
+  headers: string[];
+  /** Every non-empty row under the header row. */
+  rows: SheetCell[][];
+  /** Index of the "מספר פריט" column, or -1 when the file has no such column. */
+  keyColumn: number;
+}
+
 export interface SheetRow {
-  /** Normalized item number used for matching. */
+  /** Normalized value of the matching column. */
   key: string;
   cells: SheetCell[];
 }
 
-export interface SheetData {
-  fileName: string;
+/** A sheet with its rows keyed by the chosen column. */
+export interface KeyedSheet {
   headers: string[];
   rows: SheetRow[];
-  /** Rows that were skipped because their item number is empty. */
+  /** Rows that were skipped because the matching column is empty. */
   emptyKeyCount: number;
 }
 
 export interface ComparisonResult {
+  external: KeyedSheet;
+  internal: KeyedSheet;
   onlyInExternal: SheetRow[];
   onlyInInternal: SheetRow[];
 }
