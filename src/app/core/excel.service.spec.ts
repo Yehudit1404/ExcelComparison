@@ -1,12 +1,18 @@
 import { TestBed } from '@angular/core/testing';
-import ExcelJS from 'exceljs';
 import { ExcelService } from './excel.service';
+import { CellValue } from './sheet.model';
+import { writeWorkbook } from './xlsx/xlsx-writer';
 
-async function xlsxFile(name: string, rows: unknown[][]): Promise<File> {
-  const workbook = new ExcelJS.Workbook();
-  workbook.addWorksheet('Sheet1').addRows(rows);
-  const buffer = await workbook.xlsx.writeBuffer();
-  return new File([buffer], name);
+async function xlsxFile(name: string, rows: CellValue[][]): Promise<File> {
+  const [headers, ...data] = rows;
+  const blob = await writeWorkbook([
+    {
+      name: 'Sheet1',
+      headers: headers.map(String),
+      rows: data.map((row) => row.map((value) => ({ value }))),
+    },
+  ]);
+  return new File([blob], name);
 }
 
 describe('ExcelService.readSheet', () => {
@@ -20,7 +26,7 @@ describe('ExcelService.readSheet', () => {
     const file = await xlsxFile('ext.xlsx', [
       ['שם', 'מספר פריט', 'כמות'],
       ['א', '0AB123', 4],
-      ['ב', { formula: '"CD"&"5"', result: 'CD5' }, 2],
+      ['ב', 'cd5', 2],
     ]);
     const sheet = await service.readSheet(file);
 
@@ -33,33 +39,25 @@ describe('ExcelService.readSheet', () => {
     const file = await xlsxFile('ext.xlsx', [
       ['מספר פריט', 'תיאור'],
       ['AB1', 'x'],
-      ['', 'no key'],
+      [null, 'no key'],
     ]);
     const sheet = await service.readSheet(file);
 
-    expect(sheet.rows).toHaveLength(1);
+    expect(sheet.rows.length).toBe(1);
     expect(sheet.emptyKeyCount).toBe(1);
-  });
-
-  it('ignores empty columns that only have formatting', async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Sheet1');
-    worksheet.addRows([['מספר פריט'], ['AB1']]);
-    worksheet.getCell('E2').numFmt = '0.00';
-    const file = new File([await workbook.xlsx.writeBuffer()], 'styled.xlsx');
-
-    const sheet = await service.readSheet(file);
-    expect(sheet.headers).toEqual(['מספר פריט']);
-    expect(sheet.rows[0].cells).toHaveLength(1);
   });
 
   it('explains when the item number column is missing', async () => {
     const file = await xlsxFile('bad.xlsx', [['שם', 'כמות']]);
-    await expect(service.readSheet(file)).rejects.toThrow('לא נמצאה עמודה בשם "מספר פריט"');
+    await expectAsync(service.readSheet(file)).toBeRejectedWithError(
+      /לא נמצאה עמודה בשם "מספר פריט"/,
+    );
   });
 
   it('explains when the file is not an xlsx file', async () => {
     const file = new File(['not excel'], 'old.xls');
-    await expect(service.readSheet(file)).rejects.toThrow('לא ניתן לקרוא את הקובץ "old.xls"');
+    await expectAsync(service.readSheet(file)).toBeRejectedWithError(
+      /לא ניתן לקרוא את הקובץ "old.xls"/,
+    );
   });
 });

@@ -6,12 +6,13 @@ export const MAX_VISIBLE_ROWS = 500;
 
 @Component({
   selector: 'app-result-table',
-  templateUrl: './result-table.html',
-  styleUrl: './result-table.css',
+  standalone: true,
+  templateUrl: './result-table.component.html',
+  styleUrl: './result-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'variant()' },
 })
-export class ResultTable {
+export class ResultTableComponent {
   readonly title = input.required<string>();
   readonly variant = input.required<'external' | 'internal'>();
   readonly headers = input.required<string[]>();

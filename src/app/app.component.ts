@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { FileDrop } from './components/file-drop/file-drop';
-import { ResultTable } from './components/result-table/result-table';
+import { FileDropComponent } from './components/file-drop/file-drop.component';
+import { ResultTableComponent } from './components/result-table/result-table.component';
 import { compareSheets } from './core/compare';
 import { ExcelService, ExportSheet } from './core/excel.service';
 import { ComparisonResult, SheetData } from './core/sheet.model';
@@ -14,12 +14,13 @@ const SHEET_NAMES: Record<Side, string> = {
 
 @Component({
   selector: 'app-root',
-  imports: [FileDrop, ResultTable],
-  templateUrl: './app.html',
-  styleUrl: './app.css',
+  standalone: true,
+  imports: [FileDropComponent, ResultTableComponent],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class App {
+export class AppComponent {
   private readonly excel = inject(ExcelService);
 
   protected readonly sheets = signal<Record<Side, SheetData | null>>({

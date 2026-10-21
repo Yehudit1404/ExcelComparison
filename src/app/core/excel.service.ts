@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import type { Cell, CellValue as ExcelCellValue } from 'exceljs';
 import { ITEM_COLUMN, cleanHeader, normalizeItemKey } from './item-key';
 import { CellValue, SheetCell, SheetData, SheetRow } from './sheet.model';
+import { RawCell, readFirstSheet } from './xlsx/xlsx-reader';
+import { writeWorkbook } from './xlsx/xlsx-writer';
 
 export interface ExportSheet {
   name: string;
@@ -9,16 +10,13 @@ export interface ExportSheet {
   rows: SheetRow[];
 }
 
-const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-
 /** Reads and writes Excel files in the browser. Nothing is sent to a server. */
 @Injectable({ providedIn: 'root' })
 export class ExcelService {
   async readSheet(file: File): Promise<SheetData> {
-    const ExcelJS = await loadExcelJs();
-    const workbook = new ExcelJS.Workbook();
+    let raw: (RawCell | undefined)[][];
     try {
-      await workbook.xlsx.load(await file.arrayBuffer());
+      raw = await readFirstSheet(await file.arrayBuffer());
     } catch {
       throw new Error(
         `לא ניתן לקרוא את הקובץ "${file.name}". יש להעלות קובץ אקסל בפורמט ‎.xlsx` +
@@ -26,18 +24,12 @@ export class ExcelService {
       );
     }
 
-    const worksheet = workbook.worksheets[0];
-    if (!worksheet || worksheet.actualRowCount === 0) {
-      throw new Error(`הקובץ "${file.name}" ריק.`);
-    }
+    const firstRow = raw.findIndex((row) => row?.some(Boolean));
+    if (firstRow === -1) throw new Error(`הקובץ "${file.name}" ריק.`);
 
-    // worksheet.columnCount also counts empty columns that only have formatting.
-    let columnCount = 0;
-    worksheet.eachRow((row) =>
-      row.eachCell((_, column) => (columnCount = Math.max(columnCount, column))),
-    );
-    const headerRow = worksheet.getRow(1);
-    const headers = range(columnCount).map((c) => cleanHeader(headerRow.getCell(c).text));
+    const columnCount = raw.reduce((max, row) => Math.max(max, row?.length ?? 0), 0);
+    const columns = Array.from({ length: columnCount }, (_, c) => c);
+    const headers = columns.map((c) => cleanHeader(toSheetCell(raw[firstRow][c]).text));
     const keyColumn = headers.indexOf(ITEM_COLUMN);
     if (keyColumn === -1) {
       const found = headers.filter(Boolean).join(', ') || '(אין)';
@@ -48,77 +40,48 @@ export class ExcelService {
 
     const rows: SheetRow[] = [];
     let emptyKeyCount = 0;
-    worksheet.eachRow((row, rowNumber) => {
-      if (rowNumber === 1) return;
-      const cells = range(columnCount).map((c) => toSheetCell(row.getCell(c)));
+    for (const row of raw.slice(firstRow + 1)) {
+      if (!row?.some(Boolean)) continue;
+      const cells = columns.map((c) => toSheetCell(row[c]));
       const key = normalizeItemKey(cells[keyColumn].text);
-      if (!key) {
-        emptyKeyCount++;
-        return;
-      }
-      rows.push({ key, cells });
-    });
+      if (key) rows.push({ key, cells });
+      else emptyKeyCount++;
+    }
 
     return { fileName: file.name, headers, rows, emptyKeyCount };
   }
 
   async exportWorkbook(fileName: string, sheets: ExportSheet[]): Promise<void> {
-    const ExcelJS = await loadExcelJs();
-    const workbook = new ExcelJS.Workbook();
-
-    for (const sheet of sheets) {
-      const worksheet = workbook.addWorksheet(sheet.name, { views: [{ rightToLeft: true }] });
-      worksheet.addRow(sheet.headers).font = { bold: true };
-      for (const row of sheet.rows) {
-        const added = worksheet.addRow(row.cells.map((cell) => cell.value));
-        row.cells.forEach((cell, i) => {
-          if (cell.numFmt) added.getCell(i + 1).numFmt = cell.numFmt;
-        });
-      }
-      worksheet.columns.forEach((column, i) => {
-        const longest = Math.max(
-          sheet.headers[i]?.length ?? 0,
-          ...sheet.rows.map((row) => row.cells[i]?.text.length ?? 0),
-        );
-        column.width = Math.min(Math.max(longest + 2, 10), 60);
-      });
-    }
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    downloadBlob(new Blob([buffer], { type: XLSX_MIME }), fileName);
+    const blob = await writeWorkbook(
+      sheets.map((sheet) => ({
+        name: sheet.name,
+        headers: sheet.headers,
+        rows: sheet.rows.map((row) => row.cells),
+        widths: sheet.headers.map((header, i) => {
+          const longest = sheet.rows.reduce(
+            (max, row) => Math.max(max, row.cells[i]?.text.length ?? 0),
+            header.length,
+          );
+          return Math.min(Math.max(longest + 2, 10), 60);
+        }),
+      })),
+    );
+    downloadBlob(blob, fileName);
   }
 }
 
-/** ExcelJS is large, so it is only downloaded when a file is first used. */
-async function loadExcelJs() {
-  return (await import('exceljs')).default;
-}
-
-/** 1-based column numbers, as ExcelJS uses them. */
-function range(count: number): number[] {
-  return Array.from({ length: count }, (_, i) => i + 1);
-}
-
-function toSheetCell(cell: Cell): SheetCell {
-  const value = toPlainValue(cell.value);
-  return { value, text: displayText(value), numFmt: cell.numFmt || undefined };
-}
-
-/** Flattens formulas, rich text, hyperlinks and errors into a plain value. */
-function toPlainValue(value: ExcelCellValue): CellValue {
-  if (value === null || value === undefined) return null;
-  if (value instanceof Date || typeof value !== 'object') return value;
-  if ('result' in value) return toPlainValue((value.result ?? null) as ExcelCellValue);
-  if ('richText' in value) return value.richText.map((part) => part.text).join('');
-  if ('text' in value) return toPlainValue(value.text as ExcelCellValue);
-  if ('error' in value) return value.error;
-  return String(value);
+function toSheetCell(cell: RawCell | undefined): SheetCell {
+  const value = cell?.value ?? null;
+  return { value, text: displayText(value), numFmt: cell?.numFmt };
 }
 
 function displayText(value: CellValue): string {
   if (value === null) return '';
   if (value instanceof Date) return value.toLocaleDateString('he-IL', { timeZone: 'UTC' });
-  return String(value).trim();
+  // Hide floating point noise such as 0.1 + 0.2 = 0.30000000000000004.
+  if (typeof value === 'number') return String(Number(value.toPrecision(15)));
+  if (typeof value === 'boolean') return value ? 'TRUE' : 'FALSE';
+  return value.trim();
 }
 
 function downloadBlob(blob: Blob, fileName: string): void {

@@ -3,8 +3,9 @@ import { ChangeDetectionStrategy, Component, input, output, signal } from '@angu
 /** A box that accepts one Excel file, by click or by drag and drop. */
 @Component({
   selector: 'app-file-drop',
-  templateUrl: './file-drop.html',
-  styleUrl: './file-drop.css',
+  standalone: true,
+  templateUrl: './file-drop.component.html',
+  styleUrl: './file-drop.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'variant()',
@@ -12,7 +13,7 @@ import { ChangeDetectionStrategy, Component, input, output, signal } from '@angu
     '[class.over]': 'dragOver()',
   },
 })
-export class FileDrop {
+export class FileDropComponent {
   readonly label = input.required<string>();
   readonly variant = input.required<'external' | 'internal'>();
   /** Shown under the label: a hint, the file name, or "loading". */

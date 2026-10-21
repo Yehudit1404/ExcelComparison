@@ -19,7 +19,7 @@ describe('compareSheets', () => {
 
   it('keeps every row of a repeated item number', () => {
     const result = compareSheets(sheet('a1', 'a1'), sheet());
-    expect(result.onlyInExternal).toHaveLength(2);
+    expect(result.onlyInExternal.length).toBe(2);
   });
 
   it('returns nothing when both sheets have the same items', () => {
