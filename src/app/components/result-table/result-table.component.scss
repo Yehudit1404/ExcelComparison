@@ -29,7 +29,25 @@ header {
 h2 {
   margin: 0;
   font-size: 1.1rem;
+}
+
+.toggle {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 0;
+  font-weight: 700;
   color: var(--tone);
+  background: none;
+  border: none;
+}
+
+.arrow {
+  font-size: 0.8em;
+  transition: transform 0.15s;
+}
+.toggle[aria-expanded='true'] .arrow {
+  transform: rotate(-90deg);
 }
 
 .table-wrap {
